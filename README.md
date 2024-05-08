@@ -237,6 +237,69 @@ public class PersistNewUserPortAdapterFactory{
 
 ```
 
+### LoggerAdapter
+```java
+package com.zeluciojr.cae_framework_example.adapters.loggers;
+
+import com.cae.loggers.Logger;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class LoggerAdapter implements Logger {
+
+    /*
+    Let's pretend that instead of using the System.out::println, here a real
+    Logger library is being used
+     */
+
+    public static final Logger SINGLETON = new LoggerAdapter();
+
+    @Override
+    public void logInfo(String info) {
+        System.out.println(info);
+    }
+
+    @Override
+    public void logError(String error) {
+        System.out.println(error);
+    }
+
+    @Override
+    public void logDebug(String info) {
+        System.out.println(info);
+    }
+}
+
+```
+
+### LoggerBootstrap
+```java
+package com.zeluciojr.cae_framework_example.assemblers.loggers;
+
+import com.cae.loggers.IOLoggingMode;
+import com.cae.loggers.LoggerProvider;
+import com.zeluciojr.cae_framework_example.adapters.loggers.LoggerAdapter;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class LoggerBootstrap {
+
+    public static void startupLoggerSettings(){
+        LoggerProvider.SINGLETON
+                .setProvidedInstance(LoggerAdapter.SINGLETON)
+                .setIOLoggingMode(IOLoggingMode.CAE_NATIVE)
+                .structuredFormat(true)
+                .async(true)
+                .setUseCasesLoggingIO(true)
+                .setPortsLoggingIO(true);
+    }
+
+}
+
+```
+
 ### CreateNewUserUseCaseAssembler
 ```java
 package com.zeluciojr.cae_framework_example.assemblers.use_cases.create_new_user;
@@ -379,4 +442,22 @@ public class ErrorHandler {
 
 }
 
+```
+
+### Main
+```java
+package com.zeluciojr;
+
+import com.zeluciojr.cae_framework_example.assemblers.loggers.LoggerBootstrap;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class Main {
+
+    public static void main(String[] args) {
+        LoggerBootstrap.startupLoggerSettings();
+        SpringApplication.run(Main.class);
+    }
+}
 ```
