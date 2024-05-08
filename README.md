@@ -48,4 +48,4 @@ In this application you'll be able to take a look at:
 
 <br>
 
- 🎆 Enjoy!
+🎆 Enjoy!
