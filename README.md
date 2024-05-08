@@ -34,3 +34,16 @@ As use cases:
 - [make_user_inactive](https://github.com/zeluciojr/cae-framework-example/tree/0.7.0/cae-framework-example-core-layer/src/main/java/com/zeluciojr/cae_framework_example/core/use_cases/make_user_inactive) (ConsumerUseCase)
 - [retrieve_all_inactive_users](https://github.com/zeluciojr/cae-framework-example/tree/0.7.0/cae-framework-example-core-layer/src/main/java/com/zeluciojr/cae_framework_example/core/use_cases/retrieve_all_inactive_users) (SupplierUseCase)
 - [wipe_inactive_users](https://github.com/zeluciojr/cae-framework-example/tree/0.7.0/cae-framework-example-core-layer/src/main/java/com/zeluciojr/cae_framework_example/core/use_cases/wipe_inactive_users) (RunnableUseCase)
+
+<br>
+
+
+In this application you'll be able to take a look at:
+
+- how use cases are declared in all four possible ways.
+- use case logic vs. entity logic 
+- how to use ports within use cases
+- how a use case implementation becomes naturally high level of abstraction, easy to be understood in terms of workflow.
+- how use cases are assembled to get ready to be used in any dispatcher layer possible
+
+ 🎆 Enjoy!
