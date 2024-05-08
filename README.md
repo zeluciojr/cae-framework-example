@@ -40,11 +40,15 @@ As use cases:
 
 In this application you'll be able to take a look at:
 
-- how use cases are declared in all four possible ways.
+- how use cases are declared in all four possible types.
+- how to declare use cases as protected
 - use case logic vs. entity logic 
 - how to use ports within use cases
 - how a use case implementation becomes naturally high level of abstraction, easy to be understood in terms of workflow.
 - how use cases are assembled to get ready to be used in any dispatcher layer possible
+- how to setup Logger configurations
+- how to call the execution of use cases _(still not available here)_
+- how to call the execution of a protected use case _(still not available here)_
 
 <br>
 
