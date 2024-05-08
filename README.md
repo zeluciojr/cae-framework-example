@@ -57,6 +57,7 @@ In this application you'll be able to take a look at:
 ## ✍️ Snippets!
 
 ### CreateNewUserUseCase
+_(Core layer)_
 ```java
 package com.zeluciojr.cae_framework_example.core.use_cases.create_new_user;
 
@@ -69,6 +70,7 @@ public abstract class CreateNewUserUseCase extends FunctionUseCase<CreateNewUser
 ```
 
 ### CreateNewUserUseCaseInput
+_(Core layer)_
 ```java
 package com.zeluciojr.cae_framework_example.core.use_cases.create_new_user.io.inputs;
 
@@ -105,6 +107,7 @@ public class CreateNewUserUseCaseInput extends UseCaseInput {
 ```
 
 ### CreateNewUserUseCaseOutput
+_(Core layer)_
 ```java
 package com.zeluciojr.cae_framework_example.core.use_cases.create_new_user.io.outputs;
 
@@ -122,6 +125,7 @@ public class CreateNewUserUseCaseOutput {
 ```
 
 ### CreateNewUserUseCaseImplementation
+_(Core layer)_
 ```java
 package com.zeluciojr.cae_framework_example.core.use_cases.create_new_user.implementations;
 
@@ -156,6 +160,7 @@ public class CreateNewUserUseCaseImplementation extends CreateNewUserUseCase {
 ```
 
 ### PersistNewUserPort
+_(Core layer)_
 ```java
 package com.zeluciojr.cae_framework_example.core.use_cases.create_new_user.implementations.ports;
 
@@ -167,6 +172,7 @@ public abstract class PersistNewUserPort extends FunctionPort<User, Long> {}
 ```
 
 ### PersistNewUserPortAdapter
+_(Adapters layer)_
 ```java
 package com.zeluciojr.cae_framework_example.adapters.use_cases.create_new_user;
 
@@ -186,6 +192,7 @@ public class PersistNewUserPortAdapter extends PersistNewUserPort {
 ```
 
 ### PersistNewUserPortAdapterV2
+_(Adapters layer)_
 ```java
 package com.zeluciojr.cae_framework_example.adapters.use_cases.create_new_user;
 
@@ -205,6 +212,7 @@ public class PersistNewUserPortAdapterV2 extends PersistNewUserPort {
 ```
 
 ### PersistNewUserPortAdapterFactory
+_(Adapters layer)_
 ```java
 package com.zeluciojr.cae_framework_example.adapters.use_cases.create_new_user.factories;
 
@@ -238,6 +246,7 @@ public class PersistNewUserPortAdapterFactory{
 ```
 
 ### LoggerAdapter
+_(Adapters layer)_
 ```java
 package com.zeluciojr.cae_framework_example.adapters.loggers;
 
@@ -274,6 +283,7 @@ public class LoggerAdapter implements Logger {
 ```
 
 ### LoggerBootstrap
+_(Assemblers layer)_
 ```java
 package com.zeluciojr.cae_framework_example.assemblers.loggers;
 
@@ -301,6 +311,7 @@ public class LoggerBootstrap {
 ```
 
 ### CreateNewUserUseCaseAssembler
+_(Assemblers layer)_
 ```java
 package com.zeluciojr.cae_framework_example.assemblers.use_cases.create_new_user;
 
@@ -345,6 +356,7 @@ public class CreateNewUserUseCaseAssembler implements UseCaseAssembler<CreateNew
 ```
 
 ### CreateNewUserSpringController
+_(Dispatchers layer: Spring Controllers)_
 ```java
 package com.zeluciojr.cae_framework_example.spring_controllers.use_cases.create_new_user;
 
@@ -386,6 +398,7 @@ public class CreateNewUserSpringController {
 ```
 
 ### ErrorHandler
+_(Dispatchers layer: Spring Controllers)_
 ```java
 package com.zeluciojr.cae_framework_example.spring_controllers.error_handling;
 
@@ -445,6 +458,7 @@ public class ErrorHandler {
 ```
 
 ### Main
+_(Dispatchers layer: Spring Controllers)_
 ```java
 package com.zeluciojr;
 
