@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 
 public class CredentialSecretImplementation extends CredentialSecret {
 
-    private static final String REGEX = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\\\d)(?=.*[@$!%*?&])[A-Za-z\\\\d@$!%*?&]{8,}$";
+    private static final String REGEX = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
     private static final Pattern ALLOWED_PATTERN = Pattern.compile(REGEX);
 
     @Override
