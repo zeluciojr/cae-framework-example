@@ -47,7 +47,7 @@ In this application you'll be able to take a look at:
 - how a use case implementation becomes naturally high level of abstraction, easy to be understood in terms of workflow.
 - how use cases are assembled to get ready to be used in any dispatcher layer possible
 - how to setup Logger configurations
-- how to call the execution of use cases _(still not available here)_
+- how to call the execution of use cases
 - how to call the execution of a protected use case _(still not available here)_
 
 <br>
