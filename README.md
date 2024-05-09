@@ -1,4 +1,4 @@
-## ☕ An example of application using the [cae-framework](https://github.com/clean-arch-enablers-project/cae-framework) at its 0.7.1 version.
+## ☕ An example of application using the [cae-framework](https://github.com/clean-arch-enablers-project/cae-framework) at its 0.7.2 version.
 ![caelogo](https://github.com/zeluciojr/cae-framework-example/assets/60593328/def34ec8-0897-463a-bce3-031c1bfd205f)
 
 In this example we have as layers:
