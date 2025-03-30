@@ -94,3 +94,50 @@ For the assemblers layer, besides the use_cases, the standard packages include:
 
 These layers can be split into separate projects/modules, linked via dependency management (e.g., using Maven). However, I prefer them to be logically separated within the same project, using package structure only. That’s perfectly fine, as long as we respect the dependency direction: always from outer layers to inner layers.
 
+##### Structure of a UseCase in the Core Layer
+
+A **_UseCase_** in the core layer follows this structure (consider the example _CreateNewEnrollment_):
+
+```
+core
+└── use_cases
+    └── create_new_enrollment
+        ├── implementations
+        ├── io
+        └── CreateNewEnrollmentUseCase.java
+```
+
+The class at the root (**_CreateNewEnrollmentUseCase_**) is abstract and acts as the external interface for the **_UseCase_**. It declares the type of the **_UseCase_**—**_FunctionUseCase_**, **_ConsumerUseCase_**, **_SupplierUseCase_**, or **_RunnableUseCase_**—based on its I/O contract (i.e., whether it has input and output, just one, or neither).
+
+The **io** subpackage is structured like this:
+
+```
+core
+└── use_cases
+    └── create_new_enrollment
+        ├── implementations
+        └── io
+            ├── inputs
+            │      └── CreateNewEnrollmentUseCaseInput.java
+            └── outputs
+                    └── CreateNewEnrollmentUseCaseOutput.java
+```
+
+This package is responsible for defining the data structures the **_UseCase_** needs to receive (input) and what it promises to return (output).
+
+- The input class (**_CreateNewEnrollmentUseCaseInput_**) must extend the **_UseCaseInput_** type. This enables **_UseCase_** instances to call the **_UseCaseInput_**::_autoverify_ API to automatically verify that all required fields comply with the input contract rules.
+- The output class is flexible and doesn't need to extend any base class.
+
+Inside the implementations package, you'll find:
+
+```
+core
+└── use_cases
+    └── create_new_enrollment
+        └── implementations
+                ├── ports
+                └── CreateNewEnrollmentUseCaseImplementation.java
+```
+
+- The ports subpackage contains all the port interfaces required by the **_UseCase_** implementation.
+- The **_CreateNewEnrollmentUseCaseImplementation_** class contains the actual application logic of the **_UseCase_**. This is where you call business entities and use the defined ports—essentially, it contains the application rule algorithm. This class is concrete and extends the abstract contract of the **_CreateNewEnrollmentUseCase_** class.
