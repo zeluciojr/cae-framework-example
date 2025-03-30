@@ -1,6 +1,5 @@
 # Enrollments ☕
-
-## This is a Java project for showing how to implement an application with _Clean Architecture_ principles by using the _CAE SDK_.
+This is a Java project for showing how to implement an application with _Clean Architecture_ principles by using the _CAE SDK_.
 
 ## Summary
 - 📌 [First Things First](https://github.com/zeluciojr/cae-sdk-example/blob/main/README.md#-first-things-first)
