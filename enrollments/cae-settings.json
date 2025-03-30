@@ -1,0 +1,19 @@
+{
+    "organization": "com.zeluciojr",
+    "domain": "enrollments",
+    "monolayer": true,
+    "useCasePaths": [
+        {
+            "layer": "core",
+            "location": "src/main/java/com/zeluciojr/enrollments/core/use_cases"
+        },
+        {
+            "layer": "adapters",
+            "location": "src/main/java/com/zeluciojr/enrollments/adapters/use_cases"
+        },
+        {
+            "layer": "assemblers",
+            "location": "src/main/java/com/zeluciojr/enrollments/assemblers/use_cases"
+        }
+    ]
+}
