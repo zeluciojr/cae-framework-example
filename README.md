@@ -182,3 +182,49 @@ This means **_UseCase_** instances can be used freely, with any framework, in an
 
 This embodies one of the most important principles of the CAE SDK: **standalone instances**.
 
+##### Standalone Instances
+
+**Standalone Instances** are self-contained objects that not only encapsulate all the necessary logic, but also expose themselves as **SINGLETON** instances ready for use.
+
+In the case of **_UseCase_** instances, these are provided through **Assemblers**, since they require the injection of **Adapters** into their **Ports**.
+
+However, for **Adapters**, they often expose themselves directly as **standalone instances** by declaring a **SINGLETON** within their own class.
+
+Example:
+
+```java
+@RequiredArgsConstructor
+public class NewEnrollmentPersistencePortAdapter extends NewEnrollmentPersistencePort {
+
+    public static final NewEnrollmentPersistencePort SINGLETON = new NewEnrollmentPersistencePortAdapter(
+        EnrollmentsTableRepository.SINGLETON,
+        ExperiencesTableRepository.SINGLETON
+    );
+
+    private final EnrollmentsTableRepository enrollmentsTableRepository;
+    private final ExperiencesTableRepository experiencesTableRepository;
+
+    @Override
+    protected void executeLogic(Enrollment input, ExecutionContext correlation) {
+        this.enrollmentsTableRepository.createNew(new EnrollmentsTable(input));
+        input.getExperiences()
+             .stream()
+             .map(ExperiencesTable::new)
+             .forEach(this.experiencesTableRepository::createNew);
+    }
+}
+```
+
+The adapter above handles its own instantiation and exposes a fully functional, ready-to-use object.
+This is what we refer to as a standalone instance.
+
+Optionally, a constructor is provided to allow for dependency injection during testing (e.g., with mocked repositories).
+
+This pattern is widely adopted in CAE-based projects and has inspired a broader philosophy of enabler components—libraries and modules built to offer out-of-the-box standalone instances, such as:
+
+- Standalone HTTP Clients
+- Standalone Database Repositories
+- Standalone Retry Mechanisms
+- And more
+
+The result: plug-and-play infrastructure components that align perfectly with Clean Architecture and the CAE SDK vision.
