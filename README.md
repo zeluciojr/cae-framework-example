@@ -98,7 +98,7 @@ These layers can be split into separate projects/modules, linked via dependency 
 
 A **_UseCase_** in the core layer follows this structure (consider the example _CreateNewEnrollment_):
 
-```
+```dtd
 core
 └── use_cases
     └── create_new_enrollment
@@ -111,7 +111,7 @@ The class at the root (**_CreateNewEnrollmentUseCase_**) is abstract and acts as
 
 The **io** subpackage is structured like this:
 
-```
+```dtd
 core
 └── use_cases
     └── create_new_enrollment
@@ -130,7 +130,7 @@ This package is responsible for defining the data structures the **_UseCase_** n
 
 Inside the implementations package, you'll find:
 
-```
+```dtd
 core
 └── use_cases
     └── create_new_enrollment
@@ -141,3 +141,26 @@ core
 
 - The ports subpackage contains all the port interfaces required by the **_UseCase_** implementation.
 - The **_CreateNewEnrollmentUseCaseImplementation_** class contains the actual application logic of the **_UseCase_**. This is where you call business entities and use the defined ports—essentially, it contains the application rule algorithm. This class is concrete and extends the abstract contract of the **_CreateNewEnrollmentUseCase_** class.
+
+##### Structure of a UseCase in the Adapters Layer
+
+Each UseCase will have its own dedicated package in the Adapters layer, which initially may be empty—just waiting for the creation of adapters for the ports declared in the Core layer.
+
+For example, if we have three UseCases: CreateNewEnrollment, CreateNewRole, and EndEnrollment, the structure with potential adapters would look like this:
+
+```dtd
+adapters
+└── use_cases
+    ├── create_new_enrollment
+    │   ├── NewEnrollmentPersistencePortAdapter.java
+    │   ├── PersonRetrievalByIdPortAdapter.java
+    │   └── RoleRetrievalByIdPortAdapter.java
+    ├── create_new_role
+    │   └── NewRolePersistencePortAdapter.java
+    └── end_enrollment
+        ├── EnrollmentRetrievalByIdPortAdapter.java
+        └── EnrollmentUpdatePortAdapter.java
+```
+
+Each of these adapter classes is responsible for translating the logic expected by the Core layer into logic understood by the actual external dependencies—whether it's a database, an API, or another system.
+
