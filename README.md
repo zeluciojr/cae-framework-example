@@ -3,19 +3,34 @@
 ## This is a Java project for showing how to implement an application with _Clean Architecture_ principles by using the _CAE SDK_.
 
 ## Summary
-- 📌 First Things First
-  - 💡 — What is Clean Architecture?
-  - 💡 — What is CAE SDK?
-    - Use Case Types
-    - Port Types
-    - Layers
-    - Structure of a UseCase in the Core Layer
-    - Structure of a UseCase in the Adapters Layer
-    - Structure of a UseCase in the Adapters Layer
-    - Standalone Instances
-- ▶️ Enrollments: A Sample Application Demonstrating How to Use the SDK and Apply Clean Architecture Principles
-  - Entities
-  - Use Cases
+- 📌 [First Things First](https://github.com/zeluciojr/cae-sdk-example/blob/main/README.md#-first-things-first)
+  - 💡 — [What is Clean Architecture?](https://github.com/zeluciojr/cae-sdk-example/blob/main/README.md#--what-is-clean-architecture)
+  - 💡 — [What is CAE SDK?](https://github.com/zeluciojr/cae-sdk-example/blob/main/README.md#--what-is-cae-sdk)
+    - [Use Case Types](https://github.com/zeluciojr/cae-sdk-example/blob/main/README.md#use-case-types)
+    - [Port Types](https://github.com/zeluciojr/cae-sdk-example/blob/main/README.md#port-types)
+    - [Layers](https://github.com/zeluciojr/cae-sdk-example/blob/main/README.md#layers)
+    - [Structure of a UseCase in the Core Layer](https://github.com/zeluciojr/cae-sdk-example/blob/main/README.md#structure-of-a-usecase-in-the-core-layer)
+    - [Structure of a UseCase in the Adapters Layer](https://github.com/zeluciojr/cae-sdk-example/blob/main/README.md#structure-of-a-usecase-in-the-adapters-layer)
+    - [Structure of a UseCase in the Adapters Layer](https://github.com/zeluciojr/cae-sdk-example/blob/main/README.md#structure-of-a-usecase-in-the-assemblers-layer)
+    - [Standalone Instances](https://github.com/zeluciojr/cae-sdk-example/blob/main/README.md#standalone-instances)
+- ▶️ [Enrollments: A Sample Application Demonstrating How to Use the SDK and Apply Clean Architecture Principles](https://github.com/zeluciojr/cae-sdk-example/blob/main/README.md#%EF%B8%8F-enrollments-a-sample-application-demonstrating-how-to-use-the-sdk-and-apply-clean-architecture-principles)
+  - [Entities](https://github.com/zeluciojr/cae-sdk-example/blob/main/README.md#entities)
+    - [LegalID, CPF & UnknownLegalIdType](https://github.com/zeluciojr/cae-sdk-example/blob/main/README.md#legalid-cpf--unknownlegalidtype)
+    - [Countries](https://github.com/zeluciojr/cae-sdk-example/blob/main/README.md#countries)
+    - [Person](https://github.com/zeluciojr/cae-sdk-example/blob/main/README.md#person)
+    - [Role](https://github.com/zeluciojr/cae-sdk-example/blob/main/README.md#role)
+    - [Enrollment](https://github.com/zeluciojr/cae-sdk-example/blob/main/README.md#enrollment)
+    - [Experience](https://github.com/zeluciojr/cae-sdk-example/blob/main/README.md#experience)
+    - [UUIDBasedEntity](https://github.com/zeluciojr/cae-sdk-example/blob/main/README.md#uuidbasedentity)
+  - [Use Cases](https://github.com/zeluciojr/cae-sdk-example/blob/main/README.md#use-cases)
+    - [CreateNewPersonUseCase, Input, Output & Implementation](https://github.com/zeluciojr/cae-sdk-example/blob/main/README.md#createnewpersonusecase-input-output--implementation)
+    - [CreateNewRoleUseCase, Input, Output & Implementation](https://github.com/zeluciojr/cae-sdk-example/blob/main/README.md#createnewroleusecase-input-output--implementation)
+    - [CreateNewEnrollmentUseCase, Input, Output & Implementation](https://github.com/zeluciojr/cae-sdk-example/blob/main/README.md#createnewenrollmentusecase-input-output--implementation)
+    - [CreateNewEnrollmentExperienceUseCase, Input, Output & Implementation](https://github.com/zeluciojr/cae-sdk-example/blob/main/README.md#createnewenrollmentexperienceusecase-input-output--implementation)
+    - [EndEnrollmentUseCase, Input & Implementation](https://github.com/zeluciojr/cae-sdk-example/blob/main/README.md#endenrollmentusecase-input--implementation)
+    - [GetEnrollmentByIdUseCase, Input, Output & Implementation](https://github.com/zeluciojr/cae-sdk-example/blob/main/README.md#getenrollmentbyidusecase-input-output--implementation)
+
+<br>
 
 ## 📌 First things first:
 
@@ -674,6 +689,8 @@ public class CreateNewPersonUseCaseImplementation extends CreateNewPersonUseCase
 }
 ```
 
+<br>
+
 #### CreateNewRoleUseCase, Input, Output & Implementation
 ```java
 public abstract class CreateNewRoleUseCase extends FunctionUseCase<
@@ -731,6 +748,8 @@ public class CreateNewRoleUseCaseImplementation extends CreateNewRoleUseCase {
 }
 
 ```
+
+<br>
 
 #### CreateNewEnrollmentUseCase, Input, Output & Implementation
 ```java
@@ -807,6 +826,8 @@ public class CreateNewEnrollmentUseCaseImplementation extends CreateNewEnrollmen
 }
 ```
 
+<br>
+
 #### CreateNewEnrollmentExperienceUseCase, Input, Output & Implementation
 ```java
 public abstract class CreateNewEnrollmentExperienceUseCase extends FunctionUseCase<
@@ -882,6 +903,8 @@ public class CreateNewEnrollmentExperienceUseCaseImplementation extends CreateNe
 }
 ```
 
+<br>
+
 #### EndEnrollmentUseCase, Input & Implementation
 ```java
 public abstract class EndEnrollmentUseCase extends ConsumerUseCase<EndEnrollmentUseCaseInput> {}
@@ -928,6 +951,8 @@ public class EndEnrollmentUseCaseImplementation extends EndEnrollmentUseCase {
     }
 }
 ```
+
+<br>
 
 #### GetEnrollmentByIdUseCase, Input, Output & Implementation
 ```java
