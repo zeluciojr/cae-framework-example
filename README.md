@@ -56,7 +56,7 @@ Whenever a **_UseCase_** needs to interact with the outside world (outbound flow
 
 When a class extends one of these types, it gains:
 
-- A standardized execution API: **_Port_**::_execute_
+- A standardized execution API: **_Port_**::_executePortOn_
 
 - PortInsights: logs port execution status through **Autolog**, preserving the sequence in which ports are used in the **_UseCase_** instance's algorithm
 
