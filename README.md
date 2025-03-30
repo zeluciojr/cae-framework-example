@@ -56,7 +56,7 @@ Whenever a **_UseCase_** needs to interact with the outside world (outbound flow
 
 When a class extends one of these types, it gains:
 
-- A standardized execution API: **_Port_**::_execute_
+- A standardized execution API: **_Port_**::_executePortOn_
 
 - PortInsights: logs port execution status through **Autolog**, preserving the sequence in which ports are used in the **_UseCase_** instance's algorithm
 
@@ -93,3 +93,4 @@ For the assemblers layer, besides the use_cases, the standard packages include:
 (The assemblers are the wiring layer—they connect all parts together.)
 
 These layers can be split into separate projects/modules, linked via dependency management (e.g., using Maven). However, I prefer them to be logically separated within the same project, using package structure only. That’s perfectly fine, as long as we respect the dependency direction: always from outer layers to inner layers.
+
