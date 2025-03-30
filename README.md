@@ -64,4 +64,32 @@ When a class extends one of these types, it gains:
 
 By reusing these components, we significantly reduce friction—there's no need to define the **_UseCase_** API from scratch every time, just extend the standard contracts. The same applies to Ports. Thanks to this reuse, you also get access to **Autofeatures** that are essential for production-ready apps—without having to build them manually—like **Autolog**, **Autoverify**, **Autonotify**, and **Autodoc** and more.
 
-### WORK IN PROGRESS...
+In addition to the componentization through classes and Autofeatures, the SDK also standardizes a project structure to organize these components effectively. CAE SDK projects are structured into three layers:
+
+- **Core**: contains business entities, application rules (**_UseCase_** classes), and **_Port_** definitions
+- **Adapters**: implements adapters for the **_Port_** classes, connecting them to real-world dependencies such as HTTP clients, database repositories, etc.
+- **Assemblers**: acts as factories that instantiate _**UseCase**_ classes, injecting the required Adapters into each **_Port_**, and exposing standalone **_UseCase_** instances without relying on external instantiation
+
+These three layers are organized following the vertical slice pattern, with each **_UseCase_** acting as the central axis. For example, if there’s a **_UseCase_** named _CreateNewEnrollment_, it will be split into three packages—one per layer:
+
+- core.use_cases.**create_new_enrollment**
+- adapters.use_cases.**create_new_enrollment**
+- assemblers.use_cases.**create_new_enrollment**
+
+All components related to that specific **_UseCase_** will reside exclusively within its own set of packages across the three layers. This ensures that changes made to one **_UseCase_** do not unintentionally affect others.
+
+Within the core layer, besides the use_cases package (which contains a subpackage for each application **_UseCase_**), there's also an entities package for defining pure business logic components. These entities are independent of specific use cases and represent the most fundamental layer of the application, upon which everything else depends.
+
+In the adapters layer, in addition to the use_cases package (with subpackages mirroring each **_UseCase_** for their respective adapters), there are two important packages:
+
+- **autofeatures**: contains components that adapt the contracts of terminal **Autofeature** behaviors. For example: for **Autolog**, you might implement a **_DefaultLoggerAdapter_** using any logging library you prefer. For **Autonotify**, you could create an adapter that routes notifications to an observability platform like Datadog, sending them as custom metric datapoints
+- **dependencies**: this is where you integrate external systems. Define database repositories, HTTP clients, Kafka or SQS producers, etc., without worrying about the Core layer’s concerns.
+
+For the assemblers layer, besides the use_cases, the standard packages include:
+
+- **autofeatures**: this is where you register the adapters you've created for each Autofeature, enabling the SDK to use them during execution 
+- Any other packages needed to define global configuration components for the entire application
+
+(The assemblers are the wiring layer—they connect all parts together.)
+
+These layers can be split into separate projects/modules, linked via dependency management (e.g., using Maven). However, I prefer them to be logically separated within the same project, using package structure only. That’s perfectly fine, as long as we respect the dependency direction: always from outer layers to inner layers.
