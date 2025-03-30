@@ -146,7 +146,7 @@ core
 
 Each UseCase will have its own dedicated package in the Adapters layer, which initially may be empty—just waiting for the creation of adapters for the ports declared in the Core layer.
 
-For example, if we have three UseCases: CreateNewEnrollment, CreateNewRole, and EndEnrollment, the structure with potential adapters would look like this:
+For example, if we have three UseCases: **_CreateNewEnrollment_**, **_CreateNewRole_**, and **_EndEnrollment_**, the structure with potential adapters would look like this:
 
 ```dtd
 adapters
@@ -163,4 +163,22 @@ adapters
 ```
 
 Each of these adapter classes is responsible for translating the logic expected by the Core layer into logic understood by the actual external dependencies—whether it's a database, an API, or another system.
+
+##### Structure of a UseCase in the Assemblers Layer
+
+The standard structure for a **_UseCase_** in the Assemblers layer is simple: it consists of a single **Assembler** class for that specific **_UseCase_**.
+For example, for the **_CreateNewEnrollmentUseCase_**, the structure would be:
+
+```dtd
+assemblers
+└── use_cases
+    └── create_new_enrollment
+        └── CreateNewEnrollmentUseCaseAssembler.java
+```
+
+The purpose of the Assembler is to provide access to a standalone instance of the **_UseCase_**—completely independent of frameworks like Spring, Micronaut, or any other that manage dependency injection through beans.
+
+This means **_UseCase_** instances can be used freely, with any framework, in any environment—whether in a Lambda handler, a plain main method, or a Spring @RestController.
+
+This embodies one of the most important principles of the CAE SDK: **standalone instances**.
 
