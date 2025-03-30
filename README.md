@@ -1,10 +1,10 @@
 # Enrollments ☕
 
-### This is a Java project for showing how to implement an application with _Clean Architecture_ principles by using the _CAE SDK_.
+## This is a Java project for showing how to implement an application with _Clean Architecture_ principles by using the _CAE SDK_.
 
 But first things first:
 
-#### 💡 — What is Clean Architecture?
+### 💡 — What is Clean Architecture?
 **🤖 ChatGPT answers:** 
 
 Clean Architecture is a software design approach that organizes code around the business rules (use cases), separating it from implementation details like databases, frameworks, and user interfaces.
@@ -19,7 +19,7 @@ Its core principles are:
 
 The final goal: **create systems that are flexible, testable, and resilient to change.**
 
-#### 💡 — What is CAE SDK?
+### 💡 — What is CAE SDK?
 The CAE SDK is a project I've been developing since 2023. Its goal is to bridge the gap between building software with Clean Architecture and delivering it quickly, minimizing friction in the development process.
 
 Since Clean Architecture follows a well-defined pattern for modularizing applications around use cases, which internally call business entity functions and external-facing components, or secondary ports, such as databases, REST APIs, messaging systems and more, I created a component called **_UseCase_**, which is divided into four subtypes:
@@ -228,3 +228,733 @@ This pattern is widely adopted in CAE-based projects and has inspired a broader 
 - And more
 
 The result: plug-and-play infrastructure components that align perfectly with Clean Architecture and the CAE SDK vision.
+
+### ▶️ Enrollments: A Sample Application Demonstrating How to Use the SDK and Apply Clean Architecture Principles
+
+Enrollments serves as a reference implementation to showcase how the CAE SDK can be used in practice. It illustrates how to structure an application around use cases, implement ports and adapters, and leverage SDK features like Autolog, Autoverify, Autonotify, and Autodoc—all while adhering to Clean Architecture standards.
+
+The application implements business rules related to enrollment management, including creating enrollments, closing them, handling promotions, and managing roles associated with each enrollment.
+
+#### Entities
+Here are the entities with their properties and behaviors:
+
+```dtd
+core
+└── entities
+    └── Countries
+    ├── CPF
+    ├── Enrollment
+    ├── Experience
+    ├── LegalId
+    ├── Person
+    ├── Role
+    ├── UnknownLegalIdType
+    └── UUIDBasedEntity
+```
+
+They all contain self-contained logic that **_UseCase_** instances can invoke to drive business behavior.
+
+Their internal logic can be seen below:
+
+##### LegalID, CPF & UnknownLegalIdType
+```java
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public abstract class LegalId implements Entity {
+
+    private String value;
+
+    public boolean isValid(){
+        if (this.getValue() == null || this.getValue().isBlank())
+            return false;
+        return this.checkValidity();
+    }
+
+    protected abstract boolean checkValidity();
+
+}
+```
+```java
+public class CPF extends LegalId{
+
+    public static final String REGEX = "^(?!.*(\\d)\\1{10})(\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}|\\d{11})$";
+
+    public static CPF of(String value){
+        var newCpf = new CPF();
+        newCpf.setValue(value);
+        return newCpf;
+    }
+
+    @Override
+    protected boolean checkValidity() {
+        var regexMatches = Pattern.matches(REGEX, this.getValue());
+        var cleanValue = this.getValue()
+                .replace(".", "")
+                .replace("-", "");
+        int firstCheckDigit = calculateDigit(cleanValue.substring(0, 9), 10);
+        int secondCheckDigit = calculateDigit(cleanValue.substring(0, 9) + firstCheckDigit, 11);
+        return regexMatches && cleanValue.endsWith("" + firstCheckDigit + secondCheckDigit);
+    }
+
+    private static int calculateDigit(String cpfSegment, int weight) {
+        int sum = 0;
+        for (char digitChar : cpfSegment.toCharArray()) {
+            int digit = Character.getNumericValue(digitChar);
+            sum += digit * weight;
+            weight--;
+        }
+        int remainder = sum % 11;
+        return (remainder < 2) ? 0 : 11 - remainder;
+    }
+
+}
+```
+```java
+public class UnknownLegalIdType extends LegalId{
+
+    public static UnknownLegalIdType of(String value){
+        var legalId = new UnknownLegalIdType();
+        legalId.setValue(value);
+        return legalId;
+    }
+
+
+    @Override
+    protected boolean checkValidity() {
+        return this.getValue() != null;
+    }
+}
+```
+
+##### Countries
+```java
+@Getter
+@RequiredArgsConstructor
+public enum Countries {
+
+    BR("BR", CPF::of);
+
+    private final String name;
+    private final Function<String, LegalId> personalLegalIdConstructor;
+
+    public static Optional<Countries> of(String value){
+        return Stream.of(values())
+                .filter(allowedOption -> allowedOption.getName().equalsIgnoreCase(value))
+                .findFirst();
+    }
+
+    public static String getAllowedOptionsToString() {
+        return Stream.of(values())
+                .map(Countries::getName)
+                .reduce("", (previous, next) -> previous + next + "; ");
+    }
+}
+```
+
+##### Person
+```java
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class Person implements Entity, UUIDBasedEntity {
+
+    private UUID id;
+    private LegalId legalId;
+    private String fullName;
+    private String preferredName;
+
+    public static Person of(UUID id){
+        return Person.builder()
+                .id(id)
+                .build();
+    }
+
+    public static Person createNewOne(String fullName, String preferredName, LegalId legalId){
+        return Person.builder()
+                .id(UUID.randomUUID())
+                .fullName(fullName)
+                .preferredName(preferredName)
+                .legalId(legalId)
+                .build();
+    }
+
+    public static Person createNewOne(String fullName, LegalId legalId){
+        return Person.builder()
+                .id(UUID.randomUUID())
+                .fullName(fullName)
+                .legalId(legalId)
+                .build();
+    }
+
+    public boolean hasPreferredName(){
+        return this.preferredName != null && !this.preferredName.isBlank();
+    }
+
+}
+```
+
+##### Role
+```java
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class Role implements Entity, UUIDBasedEntity {
+
+    private UUID id;
+    private String name;
+    private String description;
+    private Boolean active;
+
+    public static Role createNewOne(String name, String description){
+        return Role.builder()
+                .id(UUID.randomUUID())
+                .name(name)
+                .description(description)
+                .active(true)
+                .build();
+    }
+
+    public static Role of(UUID id){
+        return Role.builder()
+                .id(id)
+                .build();
+    }
+
+}
+```
+
+##### Enrollment
+```java
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Enrollment implements Entity, UUIDBasedEntity {
+
+    private UUID id;
+    private Person person;
+    private Boolean active;
+
+    @Builder.Default
+    private List<Experience> experiences = new ArrayList<>();
+
+    public static Enrollment createNewOneFor(Person person, Role role){
+        var newEnrollment = Enrollment.builder()
+                .id(UUID.randomUUID())
+                .person(person)
+                .active(true)
+                .build();
+        newEnrollment.addNewExperienceAs(role);
+        return newEnrollment;
+    }
+
+    public static Enrollment of(UUID id){
+        return Enrollment.builder()
+                .id(id)
+                .build();
+    }
+
+    public Experience addNewExperienceAs(Role role){
+        this.getCurrentExperience().ifPresent(Experience::finish);
+        var newExperience = Experience.createNewOneAs(role);
+        newExperience.setEnrollment(this);
+        this.experiences.add(newExperience);
+        return newExperience;
+    }
+
+    public Optional<Experience> getCurrentExperience(){
+        return this.experiences.stream()
+                .sorted()
+                .filter(Experience::isActive)
+                .findFirst();
+    }
+
+    public Optional<Experience> getPreviousExperience() {
+        var numberOfExperiences = this.experiences.size();
+        if (this.experiences.isEmpty() || (numberOfExperiences == 1 && this.experiences.get(0).isActive()))
+            return Optional.empty();
+        Collections.sort(this.experiences);
+        Collections.reverse(this.experiences);
+        var hasOnlyOneXPWhichIsInactive = numberOfExperiences == 1;
+        var indexOfPreviousXp = numberOfExperiences - (hasOnlyOneXPWhichIsInactive? 1 : 2);
+        var previousXp = this.experiences.get(indexOfPreviousXp);
+        return Optional.of(previousXp);
+    }
+
+    public void end(){
+        this.getCurrentExperience().ifPresent(Experience::finish);
+        this.active = false;
+    }
+}
+```
+
+##### Experience
+```java
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class Experience implements Entity, UUIDBasedEntity, Comparable<Experience> {
+
+    private UUID id;
+    private Role role;
+    private LocalDateTime startedAt;
+    private LocalDateTime endedAt;
+    private Enrollment enrollment;
+
+    public static Experience createNewOneAs(Role role) {
+        return Experience.builder()
+                .id(UUID.randomUUID())
+                .startedAt(LocalDateTime.now())
+                .role(role)
+                .build();
+    }
+
+    @Override
+    public int compareTo(Experience otherExperience) {
+        return this.startedAt.compareTo(otherExperience.startedAt);
+    }
+
+    public void finish() {
+        this.endedAt = LocalDateTime.now();
+    }
+
+    public boolean isActive(){
+        return this.endedAt == null;
+    }
+
+}
+
+```
+
+##### UUIDBasedEntity
+```java
+public interface UUIDBasedEntity {
+
+    UUID getId();
+
+}
+```
+
+Once these logics are defined, we can expose them through UseCases. The **_UseCase_** declarations created are:
+
+```dtd
+core
+└── use_cases
+    └── create_new_enrollment
+    ├── create_new_enrollment_experience
+    ├── create_new_person
+    ├── create_new_role
+    ├── end_enrollment
+    └── get_enrollment_by_id
+```
+
+Their logic can be observed below:
+
+##### CreateNewPersonUseCase, Input, Output & Implementation
+```java
+public abstract class CreateNewPersonUseCase extends FunctionUseCase<
+        CreateNewPersonUseCaseInput,
+        CreateNewPersonUseCaseOutput> {}
+```
+```java
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class CreateNewPersonUseCaseInput extends UseCaseInput {
+
+    @Sensitive
+    @NotBlankInputField
+    @NotNullInputField
+    private String legalId;
+
+    @NotNullInputField
+    @NotBlankInputField
+    private String country;
+
+    @NotNullInputField
+    @NotBlankInputField
+    private String fullName;
+
+    private String preferredName;
+
+}
+```
+```java
+@Getter
+@RequiredArgsConstructor
+public class CreateNewPersonUseCaseOutput {
+
+    private final String newPersonId;
+
+}
+```
+```java
+@RequiredArgsConstructor
+public class CreateNewPersonUseCaseImplementation extends CreateNewPersonUseCase {
+
+    private final PersonRetrievalByLegalIdPort personRetrievalByLegalIdPort;
+    private final NewPersonPersistencePort newPersonPersistencePort;
+
+    @Override
+    protected CreateNewPersonUseCaseOutput applyInternalLogic(
+            CreateNewPersonUseCaseInput input,
+            ExecutionContext context) {
+        var country = this.getCountryOutta(input);
+        var legalId = this.getLegalIdFor(country, input);
+        if (legalId.isValid()){
+            this.checkAvailabilityOf(legalId, context);
+            var newPerson = Person.createNewOne(
+                    input.getFullName(),
+                    input.getPreferredName(),
+                    legalId
+            );
+            this.save(newPerson, context);
+            return new CreateNewPersonUseCaseOutput(newPerson.getId().toString());
+        }
+        else
+            throw new InputMappedException("Invalid legal ID provided");
+    }
+
+    private Countries getCountryOutta(CreateNewPersonUseCaseInput input) {
+        return Countries.of(input.getCountry())
+                .orElseThrow(() -> new InputMappedException(
+                        "Couldn't process the informed country",
+                        "Allowed options: " + Countries.getAllowedOptionsToString()
+                ));
+    }
+
+    private LegalId getLegalIdFor(Countries country, CreateNewPersonUseCaseInput input) {
+        return country.getPersonalLegalIdConstructor()
+                .apply(input.getLegalId());
+    }
+
+    private void checkAvailabilityOf(LegalId legalId, ExecutionContext context) {
+        var personWithSameLegalId = this.personRetrievalByLegalIdPort.executePortOn(legalId, context);
+        if (personWithSameLegalId.isPresent())
+            throw new InputMappedException("Legal ID has been taken");
+    }
+
+    private void save(Person newPerson, ExecutionContext context) {
+        this.newPersonPersistencePort.executePortOn(newPerson, context);
+    }
+}
+```
+
+##### CreateNewRoleUseCase, Input, Output & Implementation
+```java
+public abstract class CreateNewRoleUseCase extends FunctionUseCase<
+        CreateNewRoleUseCaseInput,
+        CreateNewRoleUseCaseOutput> {}
+```
+```java
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class CreateNewRoleUseCaseInput extends UseCaseInput {
+
+    @NotNullInputField
+    @NotBlankInputField
+    private String roleName;
+
+    @NotBlankInputField
+    private String roleDescription;
+
+}
+
+```
+```java
+@Getter
+@RequiredArgsConstructor
+public class CreateNewRoleUseCaseOutput {
+
+    private final String newRoleId;
+
+}
+```
+```java
+@RequiredArgsConstructor
+public class CreateNewRoleUseCaseImplementation extends CreateNewRoleUseCase {
+
+    private final NewRolePersistencePort newRolePersistencePort;
+
+    @Override
+    protected CreateNewRoleUseCaseOutput applyInternalLogic(
+            CreateNewRoleUseCaseInput input,
+            ExecutionContext context) {
+        var newRole = Role.createNewOne(
+                input.getRoleName(),
+                input.getRoleDescription()
+        );
+        this.save(newRole, context);
+        return new CreateNewRoleUseCaseOutput(newRole.getId().toString());
+    }
+
+    private void save(Role newRole, ExecutionContext context) {
+        this.newRolePersistencePort.executePortOn(newRole, context);
+    }
+}
+
+```
+
+##### CreateNewEnrollmentUseCase, Input, Output & Implementation
+```java
+public abstract class CreateNewEnrollmentUseCase extends FunctionUseCase<
+        CreateNewEnrollmentUseCaseInput,
+        CreateNewEnrollmentUseCaseOutput> {}
+```
+```java
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class CreateNewEnrollmentUseCaseInput extends UseCaseInput {
+
+    @NotNullInputField
+    @NotBlankInputField
+    private String personId;
+
+    @NotNullInputField
+    @NotBlankInputField
+    private String roleId;
+
+}
+```
+```java
+@Getter
+@RequiredArgsConstructor
+public class CreateNewEnrollmentUseCaseOutput {
+
+    private final String newEnrollmentId;
+
+}
+```
+```java
+@RequiredArgsConstructor
+public class CreateNewEnrollmentUseCaseImplementation extends CreateNewEnrollmentUseCase {
+
+    private final PersonRetrievalByIdPort personRetrievalByIdPort;
+    private final RoleRetrievalByIdPort roleRetrievalByIdPort;
+    private final NewEnrollmentPersistencePort newEnrollmentPersistencePort;
+
+    @Override
+    protected CreateNewEnrollmentUseCaseOutput applyInternalLogic(
+            CreateNewEnrollmentUseCaseInput input,
+            ExecutionContext context) {
+        var personToEnroll = this.findPersonBy(input.getPersonId(), context);
+        var roleToAssign = this.findRoleBy(input.getRoleId(), context);
+        var newEnrollment = Enrollment.createNewOneFor(personToEnroll, roleToAssign);
+        this.save(newEnrollment, context);
+        return new CreateNewEnrollmentUseCaseOutput(newEnrollment.getId().toString());
+    }
+
+    private Person findPersonBy(String personId, ExecutionContext context) {
+        return this.personRetrievalByIdPort.executePortOn(UUID.fromString(personId), context)
+                .orElseThrow(() -> new NotFoundMappedException(
+                        "Couldn't find the person to enroll",
+                        "ID provided was '" + personId + "'"
+                ));
+    }
+
+    private Role findRoleBy(String roleId, ExecutionContext context) {
+        return this.roleRetrievalByIdPort.executePortOn(UUID.fromString(roleId), context)
+                .orElseThrow(() -> new NotFoundMappedException(
+                        "Couldn't find the role to assign",
+                        "ID provided was '" + roleId + "'"
+                ));
+    }
+
+    private void save(Enrollment newEnrollment, ExecutionContext context) {
+        this.newEnrollmentPersistencePort.executePortOn(newEnrollment, context);
+    }
+
+}
+```
+
+##### CreateNewEnrollmentExperienceUseCase, Input, Output & Implementation
+```java
+public abstract class CreateNewEnrollmentExperienceUseCase extends FunctionUseCase<
+        CreateNewEnrollmentExperienceUseCaseInput,
+        CreateNewEnrollmentExperienceUseCaseOutput> {}
+```
+```java
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class CreateNewEnrollmentExperienceUseCaseInput extends UseCaseInput {
+
+    @NotNullInputField
+    @NotBlankInputField
+    private String enrollmentId;
+
+    @NotNullInputField
+    @NotBlankInputField
+    private String roleId;
+
+}
+```
+```java
+@Getter
+@RequiredArgsConstructor
+public class CreateNewEnrollmentExperienceUseCaseOutput {
+
+    private final String newExperienceId;
+
+}
+
+```
+```java
+@RequiredArgsConstructor
+public class CreateNewEnrollmentExperienceUseCaseImplementation extends CreateNewEnrollmentExperienceUseCase {
+
+    private final EnrollmentRetrievalByIdPort enrollmentRetrievalByIdPort;
+    private final RoleRetrievalByIdPort roleRetrievalByIdPort;
+    private final EnrollmentUpdatePort enrollmentUpdatePort;
+
+    @Override
+    protected CreateNewEnrollmentExperienceUseCaseOutput applyInternalLogic(
+            CreateNewEnrollmentExperienceUseCaseInput input,
+            ExecutionContext context) {
+        var enrollment = this.findEnrollmentBy(input.getEnrollmentId(), context);
+        var role = this.findRoleBy(input.getRoleId(), context);
+        var newXp = enrollment.addNewExperienceAs(role);
+        this.update(enrollment, context);
+        return new CreateNewEnrollmentExperienceUseCaseOutput(newXp.getId().toString());
+    }
+
+    private Enrollment findEnrollmentBy(String enrollmentId, ExecutionContext context) {
+        return this.enrollmentRetrievalByIdPort.executePortOn(UUID.fromString(enrollmentId), context)
+                .orElseThrow(() -> new NotFoundMappedException(
+                        "Couldn't find enrollment by ID of " + enrollmentId
+                ));
+    }
+
+    private Role findRoleBy(String roleId, ExecutionContext context) {
+        return this.roleRetrievalByIdPort.executePortOn(UUID.fromString(roleId), context)
+                .orElseThrow(() -> new NotFoundMappedException(
+                        "Couldn't find role by ID of " + roleId
+                ));
+    }
+
+    private void update(
+            Enrollment enrollment,
+            ExecutionContext context) {
+        this.enrollmentUpdatePort.executePortOn(enrollment, context);
+    }
+}
+```
+
+##### EndEnrollmentUseCase, Input & Implementation
+```java
+public abstract class EndEnrollmentUseCase extends ConsumerUseCase<EndEnrollmentUseCaseInput> {}
+```
+```java
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class EndEnrollmentUseCaseInput extends UseCaseInput {
+
+    @NotNullInputField
+    @NotBlankInputField
+    private String enrollmentId;
+
+}
+```
+```java
+@RequiredArgsConstructor
+public class EndEnrollmentUseCaseImplementation extends EndEnrollmentUseCase {
+
+    private final EnrollmentRetrievalByIdPort enrollmentRetrievalByIdPort;
+    private final EnrollmentUpdatePort enrollmentUpdatePort;
+
+    @Override
+    protected void applyInternalLogic(
+            EndEnrollmentUseCaseInput input,
+            ExecutionContext context) {
+        var enrollmentToEnd = this.getEnrollmentBy(input.getEnrollmentId(), context);
+        enrollmentToEnd.end();
+        this.update(enrollmentToEnd, context);
+    }
+
+    private Enrollment getEnrollmentBy(String enrollmentId, ExecutionContext context) {
+        return this.enrollmentRetrievalByIdPort.executePortOn(UUID.fromString(enrollmentId), context)
+                .orElseThrow(() -> new NotFoundMappedException(
+                        "Couldn't find enrollment of ID " + enrollmentId
+                ));
+    }
+
+    private void update(Enrollment enrollmentToEnd, ExecutionContext context) {
+        this.enrollmentUpdatePort.executePortOn(enrollmentToEnd, context);
+    }
+}
+```
+
+##### GetEnrollmentByIdUseCase, Input, Output & Implementation
+```java
+public abstract class GetEnrollmentByIdUseCase extends FunctionUseCase<
+        GetEnrollmentByIdUseCaseInput,
+        GetEnrollmentByIdUseCaseOutput> {}
+```
+```java
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class GetEnrollmentByIdUseCaseInput extends UseCaseInput {
+
+    @NotNullInputField
+    @NotBlankInputField
+    private String enrollmentId;
+
+}
+```
+```java
+@Getter
+@RequiredArgsConstructor
+public class GetEnrollmentByIdUseCaseOutput {
+
+    private final Enrollment enrollment;
+
+}
+
+```
+```java
+@RequiredArgsConstructor
+public class GetEnrollmentByIdUseCaseImplementation extends GetEnrollmentByIdUseCase {
+
+    private final EnrollmentRetrievalByIdPort enrollmentRetrievalByIdPort;
+
+    @Override
+    protected GetEnrollmentByIdUseCaseOutput applyInternalLogic(
+            GetEnrollmentByIdUseCaseInput input,
+            ExecutionContext context) {
+        var enrollment = this.getEnrollmentBy(input.getEnrollmentId(), context);
+        return new GetEnrollmentByIdUseCaseOutput(enrollment);
+    }
+
+    private Enrollment getEnrollmentBy(String enrollmentId, ExecutionContext context) {
+        return this.enrollmentRetrievalByIdPort.executePortOn(UUID.fromString(enrollmentId), context)
+                .orElseThrow(() -> new NotFoundMappedException(
+                        "Couldn't find enrollment of ID " + enrollmentId
+                ));
+    }
+}
+```
