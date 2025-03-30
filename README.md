@@ -2,7 +2,22 @@
 
 ## This is a Java project for showing how to implement an application with _Clean Architecture_ principles by using the _CAE SDK_.
 
-But first things first:
+## Summary
+- 📌 First Things First
+  - 💡 — What is Clean Architecture?
+  - 💡 — What is CAE SDK?
+    - Use Case Types
+    - Port Types
+    - Layers
+    - Structure of a UseCase in the Core Layer
+    - Structure of a UseCase in the Adapters Layer
+    - Structure of a UseCase in the Adapters Layer
+    - Standalone Instances
+- ▶️ Enrollments: A Sample Application Demonstrating How to Use the SDK and Apply Clean Architecture Principles
+  - Entities
+  - Use Cases
+
+## 📌 First things first:
 
 ### 💡 — What is Clean Architecture?
 **🤖 ChatGPT answers:** 
@@ -21,6 +36,8 @@ The final goal: **create systems that are flexible, testable, and resilient to c
 
 ### 💡 — What is CAE SDK?
 The CAE SDK is a project I've been developing since 2023. Its goal is to bridge the gap between building software with Clean Architecture and delivering it quickly, minimizing friction in the development process.
+
+#### Use Case Types
 
 Since Clean Architecture follows a well-defined pattern for modularizing applications around use cases, which internally call business entity functions and external-facing components, or secondary ports, such as databases, REST APIs, messaging systems and more, I created a component called **_UseCase_**, which is divided into four subtypes:
 
@@ -47,6 +64,8 @@ When you create a class that extends one of these types, it automatically gains:
 
 That covers the **_UseCase_** side. Another core standardization in the CAE SDK is the componentization of **_Ports_**.
 
+#### Port Types
+
 Whenever a **_UseCase_** needs to interact with the outside world (outbound flow), it can rely on **_Port_** instances, which, like **_UseCases_**, come in four subtypes:
 
 - **_FunctionPort_**
@@ -63,6 +82,8 @@ When a class extends one of these types, it gains:
 - Optional I/O logging through **Autolog** for better observability
 
 By reusing these components, we significantly reduce friction—there's no need to define the **_UseCase_** API from scratch every time, just extend the standard contracts. The same applies to Ports. Thanks to this reuse, you also get access to **Autofeatures** that are essential for production-ready apps—without having to build them manually—like **Autolog**, **Autoverify**, **Autonotify**, and **Autodoc** and more.
+
+#### Layers
 
 In addition to the componentization through classes and Autofeatures, the SDK also standardizes a project structure to organize these components effectively. CAE SDK projects are structured into three layers:
 
@@ -94,7 +115,7 @@ For the assemblers layer, besides the use_cases, the standard packages include:
 
 These layers can be split into separate projects/modules, linked via dependency management (e.g., using Maven). However, I prefer them to be logically separated within the same project, using package structure only. That’s perfectly fine, as long as we respect the dependency direction: always from outer layers to inner layers.
 
-##### Structure of a UseCase in the Core Layer
+#### Structure of a UseCase in the Core Layer
 
 A **_UseCase_** in the core layer follows this structure (consider the example _CreateNewEnrollment_):
 
@@ -142,7 +163,7 @@ core
 - The ports subpackage contains all the port interfaces required by the **_UseCase_** implementation.
 - The **_CreateNewEnrollmentUseCaseImplementation_** class contains the actual application logic of the **_UseCase_**. This is where you call business entities and use the defined ports—essentially, it contains the application rule algorithm. This class is concrete and extends the abstract contract of the **_CreateNewEnrollmentUseCase_** class.
 
-##### Structure of a UseCase in the Adapters Layer
+#### Structure of a UseCase in the Adapters Layer
 
 Each UseCase will have its own dedicated package in the Adapters layer, which initially may be empty—just waiting for the creation of adapters for the ports declared in the Core layer.
 
@@ -164,7 +185,7 @@ adapters
 
 Each of these adapter classes is responsible for translating the logic expected by the Core layer into logic understood by the actual external dependencies—whether it's a database, an API, or another system.
 
-##### Structure of a UseCase in the Assemblers Layer
+#### Structure of a UseCase in the Assemblers Layer
 
 The standard structure for a **_UseCase_** in the Assemblers layer is simple: it consists of a single **Assembler** class for that specific **_UseCase_**.
 For example, for the **_CreateNewEnrollmentUseCase_**, the structure would be:
@@ -182,7 +203,7 @@ This means **_UseCase_** instances can be used freely, with any framework, in an
 
 This embodies one of the most important principles of the CAE SDK: **standalone instances**.
 
-##### Standalone Instances
+#### Standalone Instances
 
 **Standalone Instances** are self-contained objects that not only encapsulate all the necessary logic, but also expose themselves as **SINGLETON** instances ready for use.
 
@@ -229,13 +250,13 @@ This pattern is widely adopted in CAE-based projects and has inspired a broader 
 
 The result: plug-and-play infrastructure components that align perfectly with Clean Architecture and the CAE SDK vision.
 
-### ▶️ Enrollments: A Sample Application Demonstrating How to Use the SDK and Apply Clean Architecture Principles
+## ▶️ Enrollments: A Sample Application Demonstrating How to Use the SDK and Apply Clean Architecture Principles
 
 Enrollments serves as a reference implementation to showcase how the CAE SDK can be used in practice. It illustrates how to structure an application around use cases, implement ports and adapters, and leverage SDK features like Autolog, Autoverify, Autonotify, and Autodoc—all while adhering to Clean Architecture standards.
 
 The application implements business rules related to enrollment management, including creating enrollments, closing them, handling promotions, and managing roles associated with each enrollment.
 
-#### Entities
+### Entities
 Here are the entities with their properties and behaviors:
 
 ```dtd
@@ -256,7 +277,7 @@ They all contain self-contained logic that **_UseCase_** instances can invoke to
 
 Their internal logic can be seen below:
 
-##### LegalID, CPF & UnknownLegalIdType
+#### LegalID, CPF & UnknownLegalIdType
 ```java
 @Getter
 @Setter
@@ -328,7 +349,7 @@ public class UnknownLegalIdType extends LegalId{
 }
 ```
 
-##### Countries
+#### Countries
 ```java
 @Getter
 @RequiredArgsConstructor
@@ -353,7 +374,7 @@ public enum Countries {
 }
 ```
 
-##### Person
+#### Person
 ```java
 @Getter
 @Setter
@@ -397,7 +418,7 @@ public class Person implements Entity, UUIDBasedEntity {
 }
 ```
 
-##### Role
+#### Role
 ```java
 @Getter
 @Setter
@@ -429,7 +450,7 @@ public class Role implements Entity, UUIDBasedEntity {
 }
 ```
 
-##### Enrollment
+#### Enrollment
 ```java
 @Getter
 @Setter
@@ -495,7 +516,7 @@ public class Enrollment implements Entity, UUIDBasedEntity {
 }
 ```
 
-##### Experience
+#### Experience
 ```java
 @Getter
 @Setter
@@ -535,7 +556,7 @@ public class Experience implements Entity, UUIDBasedEntity, Comparable<Experienc
 
 ```
 
-##### UUIDBasedEntity
+#### UUIDBasedEntity
 ```java
 public interface UUIDBasedEntity {
 
@@ -543,6 +564,8 @@ public interface UUIDBasedEntity {
 
 }
 ```
+
+### Use Cases
 
 Once these logics are defined, we can expose them through UseCases. The **_UseCase_** declarations created are:
 
@@ -559,7 +582,7 @@ core
 
 Their logic can be observed below:
 
-##### CreateNewPersonUseCase, Input, Output & Implementation
+#### CreateNewPersonUseCase, Input, Output & Implementation
 ```java
 public abstract class CreateNewPersonUseCase extends FunctionUseCase<
         CreateNewPersonUseCaseInput,
@@ -651,7 +674,7 @@ public class CreateNewPersonUseCaseImplementation extends CreateNewPersonUseCase
 }
 ```
 
-##### CreateNewRoleUseCase, Input, Output & Implementation
+#### CreateNewRoleUseCase, Input, Output & Implementation
 ```java
 public abstract class CreateNewRoleUseCase extends FunctionUseCase<
         CreateNewRoleUseCaseInput,
@@ -709,7 +732,7 @@ public class CreateNewRoleUseCaseImplementation extends CreateNewRoleUseCase {
 
 ```
 
-##### CreateNewEnrollmentUseCase, Input, Output & Implementation
+#### CreateNewEnrollmentUseCase, Input, Output & Implementation
 ```java
 public abstract class CreateNewEnrollmentUseCase extends FunctionUseCase<
         CreateNewEnrollmentUseCaseInput,
@@ -784,7 +807,7 @@ public class CreateNewEnrollmentUseCaseImplementation extends CreateNewEnrollmen
 }
 ```
 
-##### CreateNewEnrollmentExperienceUseCase, Input, Output & Implementation
+#### CreateNewEnrollmentExperienceUseCase, Input, Output & Implementation
 ```java
 public abstract class CreateNewEnrollmentExperienceUseCase extends FunctionUseCase<
         CreateNewEnrollmentExperienceUseCaseInput,
@@ -859,7 +882,7 @@ public class CreateNewEnrollmentExperienceUseCaseImplementation extends CreateNe
 }
 ```
 
-##### EndEnrollmentUseCase, Input & Implementation
+#### EndEnrollmentUseCase, Input & Implementation
 ```java
 public abstract class EndEnrollmentUseCase extends ConsumerUseCase<EndEnrollmentUseCaseInput> {}
 ```
@@ -906,7 +929,7 @@ public class EndEnrollmentUseCaseImplementation extends EndEnrollmentUseCase {
 }
 ```
 
-##### GetEnrollmentByIdUseCase, Input, Output & Implementation
+#### GetEnrollmentByIdUseCase, Input, Output & Implementation
 ```java
 public abstract class GetEnrollmentByIdUseCase extends FunctionUseCase<
         GetEnrollmentByIdUseCaseInput,
